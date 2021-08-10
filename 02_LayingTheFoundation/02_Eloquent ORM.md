@@ -55,3 +55,63 @@ class Custormer extends Model
   protected $fillable = ['name', 'phone', 'phone_type'];
 }
 ```
+- `public $table = 'customers';` : customers이라는 이름을 가진 테이블을 엘로퀀트에 매핑한다는 의미
+- `protected $fillable = ['name', 'phone', 'phone_type'];` : 엘로퀀트를 통해서 데이터를 가져오는 컬럼은 테이블의 name, phone, phone_type 세 가지 컬럼만 가져오는 것.
+
+```
+<?php
+use App\Models\Customer;
+$Customer::first();
+echo $Customer -> phone;
+echo $customer -> phone_type;
+```
+- 엘로퀀트 모델을 불러다 쓸 때는 정적 메서드 방식으로 사용한다.
+- 데이터를 가져올 때는 '엘로퀀트 컬렉션'의 함수를 사용하여 데이터를 불러 온다.
+- 데이터를 불러 왔을 때, 하나의 레코드에 대한 데이터이면 멤버 접근 방식으로 컬럼을 사용할 수 있으며, 배열 형태의 컬렉션이면 배열의 원소 하나에 해당하는 객체에 접근한 후 객체의 멤버로 레코드의 컬럼 값을 접근할 수 있다.
+- 컬럼 값 조회 : `$Customer -> phone`, `$customer -> phone_type`
+
+## 스토어의 원본 데이터를 변환하여 다뤄야 할 때
+- 기본적으로 쿼리를 사용하든 엘로퀀트를 사용하든 데이터베이스 안의 데이터를 그대로 보여준다. 하지만 클라이언트 쪽에 데이터를 보여 줄 때는 디비의 데이터를 그대로 보여주는 것이 아니라 가공을 해서 데이터를 보여 주는 경우가 많다. 이 경우 엘로퀀트를 사용하면 엘로퀀트로 데이터를 받아 오는 즉시 변환한 값을 받을 수 있다.
+
+### DTO를 사용하는 경우
+- 디비의 데이터를 클라이언트에 보여주기 위한 데이터로 변환하는 작업을 DTO 계층을 통해서 할 수 있다. 데이터 계층의 데이터를 DTO 계층에서 받아서 애플리케이션 계층으로 데이터를 보내기 전에 원본 데이터의 형태를 가공해서 보내주는 방법이다.
+- DTO의 구조는 멤버변수와 getter와 setter로 구성되어 있다. 멤버 변수는 원본 데이터를 저장하는 기능을 담당하고 getter와 setter는 어떠한 변환 없이 단순한 데이터를 가져오고 저장하는 역할을 하는 용도로 정의된다. getter에 어떤 추가적인 로직이 들어가는 것이 아니기 때문에 DTO의 멤버에는 영속성 계층에서 받은 데이터를 애플리케이션에서 보여 줘야 할 데이터로 변환한 것을 저장해야 한다.
+- DTO를 사용하여 데이터를 영속성 계층의 데이터와 애플리케이션 계층의 데이터로 나누는 것은 동일한 데이터를 원본 데이터와 애플리케이션용 데이터 두 가지 형태로 나눠서 저장하고 있다. 이는 일반적으로 좋지 않은 것으로 판단한다고 한다.
+- 엘로퀀트를 사용하면 이런 문제를 피할 수 있는 방법이 있다고 하는데 어떤 방법인지 살펴 보자.
+
+### 엘로퀀트를 사용하는 경우
+```
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+
+class Customer extends Model
+{
+  public $table = 'customers';
+  protected $fillable = ['name', 'phone', 'phone_type'];
+  
+  public function getNameAttribute($name)
+  {
+    return ucfirst($NAME);
+  }
+  
+  public function getPhoneTypeAttribute($phone_type)
+  {
+    switch($phone_type) {
+      case 1:
+        return "home phone";
+        break;
+      case 2:
+        return "cell phone";
+        break;
+      case 3:
+        return "work phone";
+        break;
+      default:
+        throw new Exception("dang!");
+    }
+  }
+}
+```
+
+- customer_type_name 컬럼의 의 값으로 영희, 철수가 데이터로 들어 있고 각각에 대해 customer_type_id 컬럼의 값으로 1, 2라는 데이터가 들어 있다고 하자.  customer_type_id 1이 영희를 customer_type_id  2가 철수를 지정하는 것이기 때문에 하나의 데이터만 있어도 식별이 되는 대상을 두 데이터를 넣어 만들었다. 보통 이런 경우 테이블을 하나에 두 컬럼을 정의하지 않고 아니라 타입에 관한 테이블을 따로 분리 한다. 그래서 현재 테이블에는 customer_type_id 만 넣고 customer_type이라는 다른 테이블에 id, name을 가진 대상을 넣는다. 따라서 하나의 테이블에 customer_type_name, customer_type_id 두 컬럼을 넣는 것은 중복 방식으로 데이터를 복제하는 것이기 때문에 바람직하지 않다.
