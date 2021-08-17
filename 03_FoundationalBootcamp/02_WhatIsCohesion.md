@@ -15,4 +15,37 @@
 - 핵심 시스템 구성 요소 사이에서 명확한 경계로 분할되는 방식으로 만들어 져야 한다.
 - 여럿이 합쳐 결합 될 수 있는 단위로 만들어져야 한다.
 
+```
+<?php
+namespace App\Registration;
 
+use App\User;
+Class RegisterUser
+{
+  protected $name;
+  protected $username;
+  protected $isAdmin;
+  protected $ispremierMember = false;
+  public function setName($name) {
+    $this -> name = $name;
+  }
+  public function setUsername($username) {
+    $this -> username = $username;
+  }
+  public function makeAdmin() {
+    $this -> isAdmin = true;
+  }
+  public function getUserAttributes() {
+    return [
+      'name' => ucfirst($this -> name),
+      'username' => $this -> username,
+      'isAdmin' => $this->isAdmin == false ? "NO" : "YES",
+      'isPremierMember' => $this -> isPremierMember == false ? "NO" : "YES"
+    ];
+  }
+  public function registerUser() {
+    $user = new User($this -> name, $this -> username, $this->isAdmin, $this->isPremierMember);
+    return $user;
+  }
+}
+```
