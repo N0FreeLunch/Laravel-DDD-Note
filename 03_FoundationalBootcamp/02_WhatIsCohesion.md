@@ -26,6 +26,7 @@ Class RegisterUser
   protected $username;
   protected $isAdmin;
   protected $ispremierMember = false;
+  
   public function setName($name) {
     $this -> name = $name;
   }
@@ -49,3 +50,6 @@ Class RegisterUser
   }
 }
 ```
+
+위 코드를 보면
+- username이 이미 존재하는 이름인지 중복성 검사 로직이 들어가야 한다. 중복 검사 로직을 setUsername에 넣는 것 보다는 로직의 크기가 커지니까 분리하는 편이 좋을 것이다.
