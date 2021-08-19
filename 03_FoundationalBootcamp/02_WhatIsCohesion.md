@@ -93,7 +93,7 @@ $user = $userRegister -> registerUser();
 #### 코드 개선 방법
 - 클라이언트와 직접적인 상호작용을 하는 코드는 유저 정보를 받고 유저 계정이 생성되는지 안 판단하는 것에 관심이 있다.
 - 클라이언트와 직접적인 상호작용을 하는 클래스는 유저 정보를 받으며, 유저 정보가 제대로 입력되었는지를 판단하는 책임을 갖는 클래스이다. (작업 처리의 전제 조건이 충족 되었는지 확인)
-- 클라이언트와 상호작용하는 클래스는 하나의 책임을 가지고 있기 때문에 유저의 정보를 저장하는 클래스는 별도의 클래스에 캡슐화 할 필요가 있다. (도메인 계층의 서비스 레이어에 보통 위치한다.)
+- 클라이언트와 상호작용하는 클래스는 하나의 책임을 가지고 있기 때문에 유저의 정보를 저장하는 클래스는 별도의 클래스에 캡슐화 할 필요가 있다. (도메인 계층의 서비스 레이어에 보통 위치한다. 캡슐화란 외부에서 객체 및 클래스를 접근 할 때 객체 및 내부의 세부적인 구현을 감춘다는 의미를 가지고 있다.)
 - 클라이언트와 직접 상호작용 하는 클래스는 모든 유저 정보를 받기 전에 유저 정보에 관한 변수를 초기화해야 한다. 이는 변수가 오염되지 않게 하기 위해서이다. (웹에서 새 리퀘스트가 들어오면 리퀘스트에 필요한 객체들이 새롭게 생성되는 것처럼)
 
 
@@ -102,21 +102,25 @@ $user = $userRegister -> registerUser();
 <?php
 use App\User;
 
-class RegisterUSer
+class RegisterUser
 {
   protected $safeAttribute;
   protected $user;
-  public function __construct(array $params) {
+  
+  public function __construct(arrayparams) {
     $attributes = User::fillableFromArray($params);
     $this -> safeAttributes = $attributes;
     $this -> user = new USer();
   }
+  
   public function makeAdmin() {
     $this -> user -> admin = true;
   }
+  
   public function makePremiumMember() {
     $this -> user -> premiumMember = true;
   }
+  
   public function getUser() {
     return $this -> user;
   }
@@ -127,3 +131,12 @@ class RegisterUSer
   }
 }
 ```
+### 리펙토링 코드 해석
+- 생성자 주입을 통해 $params 데이터를 받는다. 생성자는 객체 생성과 동시에 반드시 호출되는 것이기 때문에 객체를 사용하기 위해서 반드시 먼저 받아야 하는 값을 받아야 한다. 클라이언트에서 RegisterUser 객체를 사용하기 위해서는 반드시 기본 정보 name과 username을 받아야 하고 이 정보를 $params에 담고 있다.
+- `User::fillableFromArray($params)`는 User 모델의 엘로퀀트의 메소드 fillableFromArray를 호출하는 것이며, 메소드 명은 배열에서 '필요한 값만 추려낸다'(fillable)는 의미를 가지고 있다. fillable기능을 담고 있기 때문에 빈 배열이 들어들어 왔을 때의 처리를 생략할 수 있다.
+- `setName`, `setUsername`이란 메소드명에서 `makeAdmin()`, `makePremiumMember()`으로 변경되었다. 이 클래스에는 생성자가 있기 때문에 생성자에 이 메서드를 호출해서 기능의 추가 분리를 용이하게 만들었다. 또한 `$this -> user ->` 방식으로 엘로퀀트 모델의 컬럼을 지정하는 방식으로 사용되고 있기 때문에 호출과 동시에 모델에 저장을 준비하는 (save 메소드를 호출하지 않았기 때문에 데이터를 저장할 준비만 하는 것) 기능까지 갖추었다. 기존에는 모델에 저장하는 방식이 아니라 RegisterUser 객체 내부에 저장하는 방식을 사용했다.
+
+
+### 데이터의 저장
+- 도메인 모델의 관점에서 애플리케이션 계층의 데이터를 영속성 계층에 전달하는 디테일한 사항은 없어도 되는 부분이다.
+- 디테일한 부분은 별도의 클래스를 만들어서 캡슐화 해 주는 편이 좋다. 이런 계층 간의 데이터 전달에 관한 사항을 Factory 접미어를 붙여 UserFactory 같은 방식으로 만든다.
