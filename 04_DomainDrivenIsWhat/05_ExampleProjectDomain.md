@@ -24,23 +24,21 @@
 
 ## 도메인 용어 카탈로그
 ### 용어 리스트
-• Order management (주문 관리)
-• Inventory updates/audits (재고 업데이트 감사)
-• Order tracking lifecycle/workflow (주문 수명 및 워크플로우 추적)
-• Inventory management (재고 관리)
-• Item tracking (품목 추적)
-• Location in warehouse (창고 위치)
-• Quantities (수량)
-• Reserved: Amount of a product that’s already spoken for (예약됨 : 이미 언급된 상품의 수)
-• Available: Amount of a product that is in stock and ready to be sold (가능 : 재고가 있고 판매 준비가 된 제품의 양)
-• Expecting: Amount of a product that is on order (예상 : 주문된 제품의 양)
-(backordered)
-• Item lifecycle process/workflow (상품의 프로세스 및 워크 플로우의 라이프사이클)
-• Fulfillment (이행)
-• Pick and pack (픽업 및 포장)
-• Shipping system (배송 시스템)
-• Order fulfillment process/workflow (픽업 및 포장)
+- Order management (주문 관리)
+- Inventory updates/audits (재고 업데이트 감사)
+- Order tracking lifecycle/workflow (주문 수명 및 워크플로우 추적)
+- Inventory management (재고 관리)
+- Item tracking (품목 추적)
+- Location in warehouse (창고 위치)
+- Quantities (수량)
+- Reserved: Amount of a product that’s already spoken for (예약됨 : 이미 언급된 상품의 수)
+- Available: Amount of a product that is in stock and ready to be sold (가능 : 재고가 있고 판매 준비가 된 제품의 양)
+- Expecting: Amount of a product that is on order (backordered) (예상 : 주문된 제품의 양)
+- Item lifecycle process/workflow (상품의 프로세스 및 워크 플로우의 라이프사이클)
+- Fulfillment (이행)
+- Pick and pack (픽업 및 포장)
+- Shipping system (배송 시스템)
+- Order fulfillment process/workflow (픽업 및 포장)
 
-### 용어 리스트에 관하여
-- 기본적으로 영어로 정의 된 용어라서 일부 용어의 부자연스러움이 있을 수 있다.
+_기본적으로 영어로 정의 된 용어라서 일부 용어의 부자연스러움이 있을 수 있다._
 
