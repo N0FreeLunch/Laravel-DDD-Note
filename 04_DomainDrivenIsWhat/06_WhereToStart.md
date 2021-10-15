@@ -85,13 +85,13 @@
 
 ## 그룹화와 비즈니스로직
 1. 제품 수령 (Product Workflow)
-1->2. 제품 수량 업로드 (Order Workflow)
+- 1->2. 제품 수량 업로드 (Order Workflow)
 2. 제품 태깅 (Product Workflow)
-2->3. 위치 코드를 통해 선반위에 제품을 둔다. (Order Workflow)
+- 2->3. 위치 코드를 통해 선반위에 제품을 둔다. (Order Workflow)
 3. 제품이 선반 위에 위치 함 (Product Workflow)
-3->4. 제품에 대한 주문이 들어 옴 (Order Workflow)
+- 3->4. 제품에 대한 주문이 들어 옴 (Order Workflow)
 4. 제품이 선택 됨 (Product Workflow)
-4->5. 수량 조정 (Order Workflow)
+- 4->5. 수량 조정 (Order Workflow)
 5. 제품이 판매 됨 (Product Workflow)
 - Product Workflow와 Order Workflow라는 두 개의 카테고리로 나눠서 생각을 했지만, 프로덕트 워크 플로우와 오더 워크 플로우는 서로 교차되면서 비즈니스 로직을 구성한다.
 - 그룹화된 모델은 그룹들 간의 연결 (네트워크)를 통해 로직을 구성한다.
