@@ -44,3 +44,19 @@
 ### 리포지토리보다는 엘로퀀드 사용
 - 리포지토리 객체를 만들기 보다는 엘로퀀트 모델을 사용하라.
 - 리포지토리에 데이터를 검색하는 방법을 추가하는 코드가 답답해지는 과정을 피하고 엘로퀀트 컬렉션을 이용하여 우아하게 결과 집합을 반환하는 방식을 사용하자.
+
+#### 리포지토리를 사용한 코드 표현
+```php
+$claims = $claimRepository
+          ->findBy('patient_id'， $patientId)
+          ->addWhere('submitted_at', 'BETWEEN",[
+            Carbon::parse("today –l year")->toDateTimeString(), Carbon::parse("today")->toDateTimeString()
+          ])->getResults();
+```
+
+#### 엘로퀀트와 컬렉션을 사용한 코드 표현
+```php
+foreach ($claims as $claim) {
+  $cptCodeCombos[] = $cptComboRepository->find($claim->getId())->getResults()); 
+}
+```
