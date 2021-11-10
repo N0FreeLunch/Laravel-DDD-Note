@@ -22,10 +22,7 @@
 ## 라라벨 컬렉션
 - 라라벨 컬렉션은 스테로이드 배열의 역할을 한다.
 - 프로그래밍 언어에서 스테로이드라는 것은 아주 강력하게 기능이 발전된 형태를 의미한다. 그러니까 스테로이드 배열이라는 것은 php의 그냥 배열이 아닌 굉장이 강력한 기능들을 탑재한 배열의 역할을 한다는 것이다. 마치 배열이 운동선수 도핑을 한 것처럼 강력한 기능을 가지게 되는 것을 의미한다.
-
-#### 스테로이드란? 
-- https://english.stackexchange.com/questions/487060/meaning-of-an-object-on-steroid/487062
-
+- 스테로이드란? : https://english.stackexchange.com/questions/487060/meaning-of-an-object-on-steroid/487062
 
 
 ## 엘로퀀트 컬렉션의 특징
@@ -45,18 +42,85 @@
 - 리포지토리 객체를 만들기 보다는 엘로퀀트 모델을 사용하라.
 - 리포지토리에 데이터를 검색하는 방법을 추가하는 코드가 답답해지는 과정을 피하고 엘로퀀트 컬렉션을 이용하여 우아하게 결과 집합을 반환하는 방식을 사용하자.
 
-#### 리포지토리를 사용한 코드 표현
+#### 리포지토리를 사용한 코드 표현의 예
 ```php
 $claims = $claimRepository
           ->findBy('patient_id'， $patientId)
           ->addWhere('submitted_at', 'BETWEEN",[
-            Carbon::parse("today –l year")->toDateTimeString(), Carbon::parse("today")->toDateTimeString()
+              Carbon::parse("today –l year")->toDateTimeString(), Carbon::parse("today")->toDateTimeString()
           ])->getResults();
-```
 
-#### 엘로퀀트와 컬렉션을 사용한 코드 표현
-```php
 foreach ($claims as $claim) {
-  $cptCodeCombos[] = $cptComboRepository->find($claim->getId())->getResults()); 
+    $cptCodeCombos[] = $cptComboRepository->find($claim->getId())->getResults()); 
 }
 ```
+
+#### 엘로퀀트와 컬렉션을 사용한 코드 표현의 예
+```php
+Claim::where("patient_id",$patientId)
+       ->whereBetween("submitted_at", [
+          Carbon::parse("today – l year")->toDateTimeString(),
+          Carbon::parse("today")->toDateTimeString()
+])->get()
+->cptCodeCombo
+->cptCodes;
+```
+
+#### 리포지토리의 단점
+- 리포지토리 클래스를 일관되게 유지할 수 있는 기본 메소드 이외에 복잡한 요구사항을 만족하기 위한 예외적인 메소드들이 추가되게 되면, 리포지토리의 재사용성이 감소하고, 아주 긴 이름의 메소드명을 붙여야 하는 등의 코드 복잡성이 추가 된다.
+- 긴 이름의 메소드 예시 : GetCountOfProvidersWithRegisteredPatientsWithinLastYear(), CptCodesForPracticeWithinDateRange($sdate, Sedate)
+
+#### 엘로퀀트 컬렉션의 장점
+- 리포지토리에 정의되는 예외적 메소드의 추가를 하지 않는 방식으로 사용하지 않고 엘로퀀트 모델과 컬렉션의 사용법으로 표현이 가능하기 때문에 일관성을 유지할 수 있고, 라라벨의 엘로퀀트와 컬렉션을 알고 있는 사람은 해당 기능이 어떤 기능인지 쉽게 알 수 있다.
+- 클래스를 답답하게 만드는 긴 이름의 메소드 사용을 피할 수 있다.
+- 원시 쿼리와 내부 작동을 추상화하여 사용성을 높이지만, 추상화된 표현의 예외적인 사용법을 줄이고 엘로퀀트와 컬렉션의 인터페이스를 이용하기 때문에 사용하기 편하다.
+
+#### 리포지토리를 쓰는 이유
+- 영속성 계층을 숨기는 것.
+- 영속성 계층이 일관된 리포지토리 인터페이스를 제공하게 하기 위한 것.
+
+
+#### 리포지토리의 인터페이스 만들기
+ClaimRepositoryInterface
+```
+nextldentity(): int
+claimOfld(): Claim
+save(Claim $claim)
+saveAII(array $claims)
+remove(Claim Sclaim)
+removeAII(array Sclaims)
+```
+
+#### 인터페이스를 구현하는 리포지토리 클래스 만들기
+SqlClaimRepository
+```
+nextldentity(): int
+claimOfld(): Claim
+save(Claim $claim)
+saveAII(array $claims)
+remove(Claim $claim)
+removeAII(array $claims)
+```
+
+RedlsClaimReposltory
+```
+nextldentity(): int
+claimOfld(): 
+Claimsave(Claim $claim)
+saveAII{array $claims)
+remove(Claim $cteim)
+removeAII(array $claims)
+```
+
+DoctrlneClalmReposltory
+```
+nextldenlity(): int
+claimOfld(): Claim
+save(Claim $claim)
+saveAII(array $claims)
+remove(Claim $claim)
+removeAII(array $claims)
+```
+
+- 일관된 인터페이스를 갖는 리포지토리를 interface를 정의하여 implements 하는 방식으로 만들어 준다.
+
