@@ -80,4 +80,19 @@ class ClaimRepository implements ClaimRepositorylnterface {
 - filter 컬렉션의 specifies 메소드의 반환값 true, false로 데이터를 뽑아낸다.
 - 엘로퀀트 모델을 컬렉션으로 받을 때 각각의 row는 엘로퀀트 모델에 해당한다는 것을 확인할 수 있다.
 
+#### 사양의 단점
+- 사양 객체는 각각의 row에 해당하는 모델 객체가 적절한지 확인하기 위한 것으로 수 많은 원소를 포함하는 리스트의 경우, 사양을 해당 원소 갯수만큼 판별에 사용해야 한다. 모델로 가져오는 리스트의 원소의 갯수가 많아질수록 사양객체를 사용하는 것의 효율이 떨어지게 된다.
+- 이를 해결하기 위해 사양 객체를 사용해서 리스트의 필터링을 하기 전에 모델로 부터 가져오는 리스트의 수를 쿼리문을 사용해서 줄이는 방법을 사용해서 성능 문제를 해결해야 한다.
+
+```php
+$claimsSubmittedLastYear = Claim::whereBetween(
+    "submitted_at", [
+        Carbon::parse("today-l year")->toDateTimeString(),
+        Carbon::parse("today")->toDateTimeString()
+    ]
+)->get();
+```
+- 엘로퀀트 모델에서 whereBetween 메소드를 사용하여 submitted_at 컬럼의 값이 whereBetween의 두 번째 인자인 배열[]의 첫 번째 값과 두 번째 값 사이에 해당하는 데이터를 뽑는다. whereBetween은 엘로퀀트 쿼리 빌더로 구성되어 있으며, 영속성 계층에서 데이터를 가져올 때 필터링이 되어 가져와 지기 때문에 성능상의 문제를 해결하는 방법이다.
+- 위 코드에서whereBetween 절은 재사용가능한 형태이지 않지만, 클레임 모델의 쿼리를 만드는 부분을 리포지토리에서 정의하지 않고, 리포지토리는 조건을 형성하는데 필요한 값만을 전달하기 때문에 리포지토리와 모델간의 캡슐화의 경계를 무너뜨리지는 않는 방식으로 만들어져 있다.
+
 
