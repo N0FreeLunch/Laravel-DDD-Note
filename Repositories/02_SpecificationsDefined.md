@@ -18,20 +18,57 @@
 ClaimRepositoryInterface
 query(ClaimSpecificationInterface $specification)
 
-<====
+<--------
 
 ClaimRepository
 query(ClaimSpecificationInterface $specification)
 
-::::::::>
+>>>>>>>>>
 
 <interface>
 ClaimSpecificationInterface
 specifies(Claim $claim): bool
 
-<===
+<--------
 
 LastestClaimSpecification
 specifies(Claim $claim): bool
 ```
--
+
+<-------- 위쪽의 구현은 아래쪽
+
+>>>>>>>>> 위쪽이 아래쪽을 사용
+
+#### 관계 해석
+- 클레임 리포지토리의 query() 메소드는 인자로 클레임사양 인터페이스(ClaimSpecificationInterface)로 구현되는 인스턴스를 받는다.
+- 인자로 클레임 사양 인터페이스를 받는다는 것은, 클레임 사양 인터페이스를 구현하는 객체를 받을 수 있다는 의미이다.
+- 클레임 사양(ClaimSpecification)은 주어지는 클레임 모델이 받아들일 수 있는 모델인지 아닌지를 판별하는 specifies 메소드를 가지고 있다.
+- specifies메소드는 판별하는 역할을 하므로 결과값이 bool 타입이다.
+- 사양이 모델을 인자로 받을 때 해당 인스턴스가 받을 수 있는지 없는지 체크하는 것을 술어검사라고 하며, 술어검사를 하기 위한 메소드를 extends()라고 한다.
+- 클레임 사양의 술어검사를 위한 메소드는 specifies이다.
+
+```php
+namespace Claim\Submission\Domain\Contracts;
+use Claim\Submission\Domain\Models\Claim;
+use ClaimSpecificationlnterface;
+
+interface ClaimRepositorylnterface{
+    public function query(ClaimSpecificationInterface $specification);
+}
+```
+
+```php
+namespace Claim\Submission\Infrastructure\Repositories;
+use Claim\Submission\Domain\Contracts\ClaimRepositoryInterface;
+use Claim\Submission\Domain\Contracts\ClaimSpecificationlnterface;
+
+class ClaimRepository implements ClaimRepositorylnterface{
+    public function query(ClaimSpecificationInterface $specification){
+        return Claim::get()->filter(function (Claim $claim) use ($specification) {
+                return $specification->specifies($claim);
+        }
+    }
+}
+```
+
+
