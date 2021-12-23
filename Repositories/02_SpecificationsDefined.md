@@ -35,9 +35,9 @@ LastestClaimSpecification
 specifies(Claim $claim): bool
 ```
 
-<-------- 위쪽의 구현은 아래쪽
+`<--------` 위쪽의 구현은 아래쪽 (원래는 실선 화살표)
 
->>>>>>>>> 위쪽이 아래쪽을 사용
+`>>>>>>>>>` 위쪽이 아래쪽을 사용 (원래는 점선 화살표)
 
 #### 관계 해석
 - 클레임 리포지토리의 query() 메소드는 인자로 클레임사양 인터페이스(ClaimSpecificationInterface)로 구현되는 인스턴스를 받는다.
@@ -52,7 +52,7 @@ namespace Claim\Submission\Domain\Contracts;
 use Claim\Submission\Domain\Models\Claim;
 use ClaimSpecificationlnterface;
 
-interface ClaimRepositorylnterface{
+interface ClaimRepositorylnterface {
     public function query(ClaimSpecificationInterface $specification);
 }
 ```
@@ -62,7 +62,7 @@ namespace Claim\Submission\Infrastructure\Repositories;
 use Claim\Submission\Domain\Contracts\ClaimRepositoryInterface;
 use Claim\Submission\Domain\Contracts\ClaimSpecificationlnterface;
 
-class ClaimRepository implements ClaimRepositorylnterface{
+class ClaimRepository implements ClaimRepositorylnterface {
     public function query(ClaimSpecificationInterface $specification){
         return Claim::get()->filter(function (Claim $claim) use ($specification) {
                 return $specification->specifies($claim);
@@ -70,5 +70,14 @@ class ClaimRepository implements ClaimRepositorylnterface{
     }
 }
 ```
+
+#### 코드 해석
+- ClaimRepositorylnterface를 구현하는 ClaimRepository는 query라는 메소드를 가지고 있다.
+- query 메소드는 ClaimSpecificationInterface를 구현하는 인스턴스인 $specification라는 인터페이스를 받고
+- Claim 객체에서 영속성 계층의 데이터 리스트를 받아와서
+- 받아온 리스트에서 사양($specification)에서 정한 기간에 해당하는 데이터만 리스트에서 뽑는다.
+- 사양에 해당한다는 것은 정한 기간에 해당한다는 것으로 여기서는 specifies 메소드를 통해서 리스트의 하나의 원소가 사양에서 지정한 데이터인 특정 기간에 해당하는지 확인을 한다.
+- filter 컬렉션의 specifies 메소드의 반환값 true, false로 데이터를 뽑아낸다.
+- 엘로퀀트 모델을 컬렉션으로 받을 때 각각의 row는 엘로퀀트 모델에 해당한다는 것을 확인할 수 있다.
 
 
