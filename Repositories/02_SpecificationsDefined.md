@@ -94,7 +94,32 @@ $claimsSubmittedLastYear = Claim::whereBetween(
 ```
 - 엘로퀀트 모델에서 whereBetween 메소드를 사용하여 submitted_at 컬럼의 값이 whereBetween의 두 번째 인자인 배열[]의 첫 번째 값과 두 번째 값 사이에 해당하는 데이터를 뽑는다. whereBetween은 엘로퀀트 쿼리 빌더로 구성되어 있으며, 영속성 계층에서 데이터를 가져올 때 필터링이 되어 가져와 지기 때문에 성능상의 문제를 해결하는 방법이다.
 - 위 코드에서whereBetween 절은 재사용가능한 형태이지 않지만, 클레임 모델의 쿼리를 만드는 부분을 리포지토리에서 정의하지 않고, 리포지토리는 조건을 형성하는데 필요한 값만을 전달하기 때문에 리포지토리와 모델간의 캡슐화의 경계를 무너뜨리지는 않는 방식으로 만들어져 있다.
-- 빠른 구현에 목표를 두고 있다면, 다양한 컬렉션과 모델 파사드를 사용하는 방식으로 코드를 짤 수 있다. 사양을 사용한다는 것은 관심사의 분리와 명시적인 개념 정의를 할 수 있는 반면 모델을 확장하는 방식은 사양과 같이 따로 분리될 수 있는 독립적인 로직을 사용하지 않기 때문에 재사용성이 떨어지고 반복된 형태의 코드를 만들기 때문에 기술 부채의 문제가 생긴다.
+- 빠른 구현에 목표를 두고 있다면, 다양한 컬렉션과 모델 파사드를 사용하는 방식으로 코드를 짤 수 있다. 사양을 사용한다는 것은 관심사의 분리와 명시적인 개념 정의를 할 수 있는 반면 위와 같이 모델을 확장하는 방식은 사양과 같이 따로 분리될 수 있는 독립적인 로직을 사용하지 않기 때문에 재사용성이 떨어지고 반복된 형태의 코드를 만들기 때문에 기술 부채의 문제가 생긴다.
 
-### 리포지토리
-- 데이터 필터링, 결과의 수 제한 등을 통해 쿼리 실행 시간이나 결과 쿼리의 양을 줄이는 방식이 필요하다. 리포지토리에 메소드를 추가하는 방식으로 submitWithinRange($startDate, $endDate) 재사용성을 높일 수 있다.
+### 리포지토리에 사양 정의하기
+- 데이터 필터링, 결과의 수 제한 등을 통해 쿼리 실행 시간이나 결과 쿼리의 양을 줄이는 방식이 필요하다. 리포지토리에 메소드를 추가하는 방식으로 `submitWithinRange($startDate, $endDate)` 재사용성을 높일 수 있다.
+```php
+namespace Claim\Submission\Domain\Contracts;use Claim\Submission\Domain\Models\Claim;
+interface ClaimSpecificationlnterface{
+    public function specifies(Claim $claim);
+}
+```
+- 사양은 재사용할 수 있어야 한다. 컬렉션에 적용하는 사양뿐만 아니라, 쿼리빌더 방식으로 적용하는 사양도 재사용 가능한 단위로 만들어 주어야 한다.
+- 사양은 단일한 조건을 판별하는 방식으로 정의를 한다.
+
+#### 단일한 조건으로 사양을 분리했을 경우
+- 날짜 범위와 상태에 대한 두 가지 개별 사양이 만들어진다.
+1. 날짜 범위를 필터링 할 때 쓰는 조건
+2. 상태를 필터링 할 때 쓰는 조건
+
+```
+<?php
+use Claim\Submission\Infrastructure\Repositories\ClaimRepository;
+SclaimRepository = new ClaimRepository();
+
+$latestClaims = $claimRepository->query(
+    new LatestClaimSpecification(
+        new \DateTimeImmutable('-30 days')
+    );
+```
+
