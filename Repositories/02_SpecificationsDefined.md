@@ -112,8 +112,7 @@ interface ClaimSpecificationlnterface{
 1. 날짜 범위를 필터링 할 때 쓰는 조건
 2. 상태를 필터링 할 때 쓰는 조건
 
-```
-<?php
+```php
 use Claim\Submission\Infrastructure\Repositories\ClaimRepository;
 SclaimRepository = new ClaimRepository();
 
