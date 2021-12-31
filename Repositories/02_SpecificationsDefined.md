@@ -153,4 +153,20 @@ $usersAddr = User::with('address') //join on address relation
 #### 의미론적인 스코프이름
 - 스코프를 만들 때는 scopeIsActive(), scopeIsMale(), scopeIsFemale(), scopeHasPublished() 와 같이 메소드의 이름이 의미론적이어야 한다. 
 - 쿼리의 세부 사항을 정하는 것이 아니라, 메소드 명만 보고서도 해당 스코프를 사용할 수 있도록 만들어 주는 것이 중요하다.
+- 새로운 리포지토리 메소드 안에 새로운 동작을 캡슐화하며, 동작이 제공하는 목적과 의도를 완전히 포착할 수 있는 유비쿼터스 언어에 따라 메소드 이름을 지정한다.
 
+```
+public function getPublishedMales(\DateTimeImmutable $isAtLeastAge): OueryBuilder
+{
+    $users = User::with('address')
+    ->isActive()
+    ->isMale()
+    ->isAtLeastAge($age)
+    ->hasPublished();
+}
+```
+#### 의미론적 이름의 스코프를 작성하는 이점
+- 코드가 분리되어 적절한 쿼리를 작성할 수 있다.
+- 이름이 도메인 기반인 유비쿼터스 언어의 정의를 통해 쿼리 언어를 만들 수 있다.
+- 구현의 세부 사항을 파고 들지 않고도 코드가 실제 수행하는 작업을 한 눈에 명확하게 이해할 수 있다.
+- 모델별로 의미 있는 제약 조건을 설정하였다.
