@@ -1,4 +1,3 @@
-
 ### 쿼리빌더 메소드 사용하기
 ```
 $usersAddr = User::with('address') //join on address relation
@@ -16,7 +15,7 @@ $usersAddr = User::with('address') //join on address relation
 - 하지만 이런 좋은 점 이면에는 큰 책임이 따른다.
 
 
-### 코드 조각 만들기
+### 의미론적인 코드 조각
 - 작은 단위의 기능 조각이 되는 코드를 짜서 재사용 가능성을 높이고 추가 기능을 구축할 수 있는 더 나은 아키텍처를 만드는 것이 낫다
 - 모델을 체이닝 방식으로 확장하는 방식의 코드는 가독성을 떨어뜨릴 수 있다.
 - 기능의 조각을 만들어 나가는 개발 방식은 다른 개발자들에게 읽히기 쉬운 코드를 만드는 장점이 있다.
@@ -37,32 +36,37 @@ public function getPublishedMales(\DateTimeImmutable $isAtLeastAge): OueryBuilde
     ->hasPublished();
 }
 ```
+
 #### 의미론적 이름의 스코프를 작성하는 이점
 - 코드가 분리되어 적절한 쿼리를 작성할 수 있다.
 - 이름이 도메인 기반인 유비쿼터스 언어의 정의를 통해 쿼리 언어를 만들 수 있다.
 - 구현의 세부 사항을 파고 들지 않고도 코드가 실제 수행하는 작업을 한 눈에 명확하게 이해할 수 있다.
 - 모델별로 의미 있는 제약 조건을 설정하였다.
 
-### 코드조각을 만드는 방법
+### 코드 조작
+#### 코드조각을 만드는 방법
 - 일단은 모델을 체이닝 방식으로 확장하는 방식으로 돌아가는 코드를 만든다.
 - 제약 조건을 추가할 객체, 유비쿼터스 언어의 적절한 용어를 따라 쿼리조각을 만든다.
 - 다양한 서비스, 프로토콜 및 여러 클래스에서 사용되는 더 복잡한 쿼리의 경우 기능을 더 작은 조각으로 나눈다.
 
-
-### 코드 조각의 장점
+#### 코드 조각의 장점
 - 재사용 가능하며 다양한 상황에서 스코프의 조합으로 쿼리를 구성할 수 있다.
 - 거대한 단위의 태스트를 하는 대신 작은 단위로 확인할 결과를 확인할 수 있는 장점이 있다.
 
-
-### 코드 조각을 만들 때 주의 할 점
+#### 코드 조각을 만들 때 주의 할 점
 - 도메인 자체에서 발견되는 비즈니스 규칙 및 개념에 부합되는 코드 조각을 만들기 위해 노력할 필요가 있다.
 - 도메인 컨텍스트의 경계를 잘못 판단하거나 너무 세분화 하지 않았는지 확인할 필요가 있다.
 
-
 ### 쿼리빌더 사양의 장점
-영속성 계층의 데이터를 가져올 때, 컬렉션 보다는 쿼리 빌더를 통해 데이터를 필터링하는 것이 성능이 좋다. 사양은 백앤드에서 영속성 계층의 데이터를 백앤드의 로직을 통해 필터링을 할 수 있지만 성능 상의 문제를 피할 수 있는 수단을 제공한다.
+- 영속성 계층의 데이터를 가져올 때, 컬렉션 보다는 쿼리 빌더를 통해 데이터를 필터링하는 것이 성능이 좋다. 사양은 백앤드에서 영속성 계층의 데이터를 백앤드의 로직을 통해 필터링을 할 수 있지만 성능 상의 문제를 피할 수 있는 수단을 제공한다.
+- 전통적인 리포지토리를 사용하는 것과 달리 라라벨에서는 컬렉션 및 로컬 및 글로벌 스코프를 모델에 정의하는 방식으로 관계형 데이터베이스로 할 수 있는 거의 모든 작업을 수행하는 빠르고 현실적이고 직접적인 접근 방식을 이용할 수 있다.
+
+### 리포지토리 패턴이 의미 없는가?
+- 리포지토리 모델은 영속성 계층과 도메인 계층을 분리하기 위한 수단으로서 유용하다. 스코프와 컬렉션을 이용하는 방식은 관계형 데이터베이스를 사용할 때만 이용 가능한 수단이기 때문에 데이터베이스 의존성이 존재한다.
+- 리포지토리 모델은 관계형 디비, 레디스, 엘라스틱서치, 인메모리 디비 등 다양한 저장소를 연결하는 방식에 공통적으로 사용할 수 있다.
 
 
+### 리포지토리와 엘로퀀트 사양 코드 구현의 예
 ```php
 <?php
 //ClaimRepositoryInterface.php
@@ -70,15 +74,40 @@ public function getPublishedMales(\DateTimeImmutable $isAtLeastAge): OueryBuilde
    public function formatDateOfService($format='Y-m-d h:i:s'):\DateTimeImmutable;
    public function getEstimatedClaimAmount($claimId): float;
 ```
-- 사양을 사용하면 위와 같이 리포지토리를 만들 필요가 없다.
-
-
-
 
 ```php
 <?php
     $claim = Claim::find(123)；
     $progressNotes = $claim->progressNotes->toArray();
-    $dateOfService = \DateTime::format($claim->dateOfService, 'm-d-Y');    $estimatedClaimAmount = $claim->estimated_claim_amount;
-
+    $dateOfService = \DateTime::format($claim->dateOfService, 'm-d-Y');
+    $estimatedClaimAmount = $claim->estimated_claim_amount;
 ```
+
+| Repository | Eloquent Specifices |
+|------------|---------------------|
+| `$repository->all()` | `Model::all() or Model::get()` |
+| `$repository->create($repository->getNextId(), $data=[])` | `Model::create($data=[])` or `$model->fill()` or `$model = new Model($data=[])` |
+| `$repository->update($id, $data=[])` | `Model::update($data=[])` or `$model->association = $x;` or `$model->save();` |
+| `$repository->delete($id)` or `$repository->delete` | `Model::delete($id)` or `Model::destroy($ids=[])` | 
+`$repository->findAllBy($ids=[])` or `$rows=$repository->where('id', 'IN',[1,2,3]); if (!empty($rows)) {$row=$rows[0];}` | `Model::find($id=[]);` or `$row=$model->whereIn('id',[1,2,3])->get()->findOrFail()` |
+
+
+### 일반적인 리포지토리 인터페이스
+```php
+<?php
+interface Repositorylnterface
+{
+    public	function	all()；	
+    public	function	create(array	$data);
+    public	function	update(array	$data, $id);
+    public	function	delete($id);	
+    public	function	show($id);	
+}
+```
+
+#### 모델의 리포지터리화
+- 관련 기능을 그룹화 하듯 모델 자체 내에 배치하는 방식으로 관련 기능끼리는 가깝게 배치하는 방식의 코드가 좋다.
+
+### 엘로퀀트의 단점을 해결하는 방법
+- 엘로퀀트의 단점은 문제를 분리하거나, 논리의 유사한 부분을 명시적이고 명확한 방식으로 캡슐화 하지 않는 점이다. 이러한 방식은 도메인 모델의 개념을 혼란 스럽게 만들고 클래스의 목적을 덜 명확하게 만들 수 있기 있다.
+- 이를 완화하는 방법은 주어진 객체가 사양을 사용하여 기능별로 나누는 것이다. 유비쿼터스 언어로 이름 지어진 술어 논리를 만들어 명시적으로 정의된 방식으로 사용할 수 있도록 만드는 것이 필요하다.
