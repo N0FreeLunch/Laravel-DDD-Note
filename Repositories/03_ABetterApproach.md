@@ -66,7 +66,7 @@ public function getPublishedMales(\DateTimeImmutable $isAtLeastAge): OueryBuilde
 - 리포지토리 모델은 관계형 디비, 레디스, 엘라스틱서치, 인메모리 디비 등 다양한 저장소를 연결하는 방식에 공통적으로 사용할 수 있다.
 
 
-### 리포지토리와 엘로퀀트 사양 코드 구현의 예
+### 리포지토리와 엘로퀀트 코드의 
 ```php
 <?php
 //ClaimRepositoryInterface.php
