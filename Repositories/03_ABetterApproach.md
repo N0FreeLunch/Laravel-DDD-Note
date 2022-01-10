@@ -83,8 +83,8 @@ public function getPublishedMales(\DateTimeImmutable $isAtLeastAge): OueryBuilde
     $estimatedClaimAmount = $claim->estimated_claim_amount;
 ```
 
-| Repository | Eloquent Specifices |
-|------------|---------------------|
+| Repository | Eloquent Specification |
+|------------|------------------------|
 | `$repository->all()` | `Model::all() or Model::get()` |
 | `$repository->create($repository->getNextId(), $data=[])` | `Model::create($data=[])` or `$model->fill()` or `$model = new Model($data=[])` |
 | `$repository->update($id, $data=[])` | `Model::update($data=[])` or `$model->association = $x;` or `$model->save();` |
