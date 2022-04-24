@@ -13,16 +13,16 @@ protected $fillable = ['shopper_id', 'cart_id', 'payment_id', 'shipping_id'];
 
 public function __construct(Shopper $shopper, CartId $cartId, Payment$paymentId=null, ShippingId $shippingId=null)
 {
-	parent::__construct();
-	$this->shopperId = $shopperld;
-	$this->cartId = $cartId;
-	$this->billingId = $billingId;
-	$this->shippingId = $shippingId;
+    parent::__construct();
+    $this->shopperId = $shopperld;
+    $this->cartId = $cartId;
+    $this->billingId = $billingId;
+    $this->shippingId = $shippingId;
 }
-	public function orderLines()
-	{
-		return $this->hasMany(OrderLine::class);
-	}
+    public function orderLines()
+    {
+        return $this->hasMany(OrderLine::class);
+    }
 }
 ```
 
@@ -34,25 +34,25 @@ use Ecommerce\Domain\Models\{Product\ProductId, Order\OrderId);
 
 class OrderLine extends Model
 {
-  protected Order $order;	
+  protected Order $order;    
   protected Product $product;
   protected int $quantity;
 
   protected $fillable = ['product_id', 'orderLineAmount', 'order_id', 'quantity'];
 
-	public function __construct(Product $product, int $quantity, Order $order)	{
-		parent::construct();
-		$this->product = $product;
-		$this->quantity = $quantity;
-	}
-	public function order()
-	{
-		return $this->belongsTo(Order::class);
-	}
-	public function product()
-	{
-		return $this->hasOne(Product::class);
-	}
+    public function __construct(Product $product, int $quantity, Order $order)    {
+        parent::construct();
+        $this->product = $product;
+        $this->quantity = $quantity;
+    }
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+    public function product()
+    {
+        return $this->hasOne(Product::class);
+    }
 }
 ```
 
@@ -77,39 +77,39 @@ $order->addOrderLine($product, $qty);
 //use cases & namespaces
 use Ecommerce\Domain\Models\Orders\OrderStatus;use Illuminate\Support\Facades\DB;
 class Order extends Model{
-	//methods and property definitions	public $orderLines = [];	const TAXRATE = .10;
-	private $status = OrderStatus::ORDER_STARTED;
-	/*
-	* Invariant #2 & #3 are protected here
-	*/
-	public function addOrderLine(Product $product, int $qty=1)	{
-		$orderLine = new OrderLine($product, $qty);
-		$price = $product->price;
-		foreach ($qty as $q) {
-			$this->total += ($price +
-				(static::TAX_RATE * $price));
-		}
-		$this->orderLines[] = $orderLine;
-	}
-	/**
-	* Invariant #1 is protected here
-	*/
-	public function startCheckout()
-	{
-	if (!empty($this->orderLines) &&
-		(count($this->orderLines) > 0)) {
-		//save the order lines within a transaction so we can		//guarantee the state of the order stays consistent		DB::transaction(function() {
-			foreach ($this->orderLines as $orderLine) {
-        $this->associate($orderLine);
-			}
-			$this->save();
-		});
-		/*start checkout process with a job or service.
-		In theory, this would also change the status of the
-		Order to something like OrderStatus:CHECKOUT_STARTED*/
-		}	
-		return new JsonResponse("Order must have at least one Order		Line before Checkout can begin", 500);
-	}
+    //methods and property definitions    public $orderLines = [];    const TAXRATE = .10;
+    private $status = OrderStatus::ORDER_STARTED;
+    /*
+    * Invariant #2 & #3 are protected here
+    */
+    public function addOrderLine(Product $product, int $qty=1)    {
+        $orderLine = new OrderLine($product, $qty);
+        $price = $product->price;
+        foreach ($qty as $q) {
+            $this->total += ($price +
+                (static::TAX_RATE * $price));
+        }
+        $this->orderLines[] = $orderLine;
+    }
+    /**
+    * Invariant #1 is protected here
+    */
+    public function startCheckout()
+    {
+    if (!empty($this->orderLines) &&
+        (count($this->orderLines) > 0)) {
+        //save the order lines within a transaction so we can        //guarantee the state of the order stays consistent        DB::transaction(function() {
+        foreach ($this->orderLines as $orderLine) {
+                       $this->associate($orderLine);
+            }
+            $this->save();
+        });
+        /*start checkout process with a job or service.
+        In theory, this would also change the status of the
+        Order to something like OrderStatus:CHECKOUT_STARTED*/
+        }    
+        return new JsonResponse("Order must have at least one Order        Line before Checkout can begin", 500);
+    }
 }
 ```
 
@@ -161,5 +161,43 @@ class Order extends Model
             $this->addOrderLine($product, $newOuantity);
         }
     }
+}
+```
+
+```php
+//namespace & use statements
+class Order extends Model
+{
+	//properties and method definitions
+	/**
+	* @param $sequence : The location of the order line in the array
+	*/
+	public function removeOrderline($sequence)
+	{
+		if (isset($this->orderLines[$sequence])) {
+			$orderLine = $this->orderLines[$sequence];
+			$totalAmountDelta = $orderLine->product->price +
+				($orderLine->product->price * static::TAX_RATE);
+			$this->total -= $totalAmountDelta;
+			unset ($this->orderLines[$sequence]));
+		}
+	}
+		
+	public function updateOuantity($sequence, $newOuantity)
+	{
+		if (isset($this->orderLines[$sequence])) {
+			//get the product that corresponds to that order line:
+			$orderLine = $this->orderLines[$sequence];
+			$product = $orderLine->product;
+			//remove the orderLine completely from the array:
+			$totalAmountDelta = $product->price + ($product->price
+				* static::TAX_RATE);
+			$this->amount -= $totalAmountDelta;
+			unset($this->orderLines[$sequence]);
+			//we dont have to worry about adding the product's
+			//tax because that logic is already in addOrderLine():
+			$this->addOrderLine($product, SnewOuantity);
+		}
+	}
 }
 ```
