@@ -1,30 +1,42 @@
+
+## Order 모델
 ```php
 namespace Ecommerce\Domain\Models\Orders\Order;
+
 use Illuminate\Database\Eloquent\Model;
 use Ecommerce\Domain\Models\{Payment\PaymentId, Shipping\ShippingId, Cart\CartId, Billing\BillingId};
 
-protected float $total=0.00;
-
-protected Shopperld $shopper;
-protected CartId $cartId;
-protected ShippingId $shippingId;
-protected PaymentId $paymentId;
-protected $fillable = ['shopper_id', 'cart_id', 'payment_id', 'shipping_id'];
-
-public function __construct(Shopper $shopper, CartId $cartId, Payment$paymentId=null, ShippingId $shippingId=null)
+class Order extends Model
 {
-    parent::__construct();
-    $this->shopperId = $shopperld;
-    $this->cartId = $cartId;
-    $this->billingId = $billingId;
-    $this->shippingId = $shippingId;
-}
+    protected float $total=0.00;
+
+    protected Shopperld $shopper;
+    protected CartId $cartId;
+    protected ShippingId $shippingId;
+    protected PaymentId $paymentId;
+    protected $fillable = ['shopper_id', 'cart_id', 'payment_id', 'shipping_id'];
+
+    public function __construct(Shopper $shopper, CartId $cartId, Payment $paymentId=null, ShippingId $shippingId=null)
+    {
+        parent::__construct();
+        $this->shopperId = $shopperId;
+        $this->cartId = $cartId;
+        $this->billingId = $billingId;
+        $this->shippingId = $shippingId;
+    }
+    
     public function orderLines()
     {
         return $this->hasMany(OrderLine::class);
     }
 }
 ```
+- Order모델과 OrderLine 모델의 관계는 1:n 관계
+- 하나의 주문은 여러 OrderLine을 가져야 한다. 왜냐하면 주문라인은 상황에 따라서 여러 다른 총액 상황을 가지고 있다.
+- 상황에 따른 주문 총액 계산이 달라지기 때문에 이를 기록해야 해서 하나의 Order 모델에는 여러 OrderLine을 가져야 하는 것.
+- 클레스의 멤버 변수의 값은 엔티티에 해당한다. 
+- 일반적으로 객체의 멤버 변수를 세팅할 때, 생성자를 통해서 세팅한다는 것은 한 번만 세팅해서 값을 가져다 쓰겠다는 의미이다.
+
 
 ```php
 namespace Ecommerce\Domain\Models\Orders\Order;
@@ -34,27 +46,31 @@ use Ecommerce\Domain\Models\{Product\ProductId, Order\OrderId);
 
 class OrderLine extends Model
 {
-  protected Order $order;    
-  protected Product $product;
-  protected int $quantity;
+    protected Order $order;    
+    protected Product $product;
+    protected int $quantity;
 
-  protected $fillable = ['product_id', 'orderLineAmount', 'order_id', 'quantity'];
+    protected $fillable = ['product_id', 'orderLineAmount', 'order_id', 'quantity'];
 
-    public function __construct(Product $product, int $quantity, Order $order)    {
+    public function __construct(Product $product, int $quantity, Order $order)
+    {
         parent::construct();
         $this->product = $product;
         $this->quantity = $quantity;
     }
+    
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
+    
     public function product()
     {
         return $this->hasOne(Product::class);
     }
 }
 ```
+
 
 ```php
 //create order object
@@ -75,14 +91,20 @@ $order->addOrderLine($product, $qty);
 
 ```php
 //use cases & namespaces
-use Ecommerce\Domain\Models\Orders\OrderStatus;use Illuminate\Support\Facades\DB;
-class Order extends Model{
-    //methods and property definitions    public $orderLines = [];    const TAXRATE = .10;
+use Ecommerce\Domain\Models\Orders\OrderStatus;
+use Illuminate\Support\Facades\DB;
+
+class Order extends Model
+{
+    //methods and property definitions    
+    public $orderLines = [];
+    const TAXRATE = .10;
     private $status = OrderStatus::ORDER_STARTED;
     /*
     * Invariant #2 & #3 are protected here
     */
-    public function addOrderLine(Product $product, int $qty=1)    {
+    public function addOrderLine(Product $product, int $qty=1)
+    {
         $orderLine = new OrderLine($product, $qty);
         $price = $product->price;
         foreach ($qty as $q) {
@@ -91,16 +113,17 @@ class Order extends Model{
         }
         $this->orderLines[] = $orderLine;
     }
+    
     /**
     * Invariant #1 is protected here
     */
     public function startCheckout()
     {
-    if (!empty($this->orderLines) &&
-        (count($this->orderLines) > 0)) {
-        //save the order lines within a transaction so we can        //guarantee the state of the order stays consistent        DB::transaction(function() {
-        foreach ($this->orderLines as $orderLine) {
-                       $this->associate($orderLine);
+        if (!empty($this->orderLines) &&
+            (count($this->orderLines) > 0)) {
+            //save the order lines within a transaction so we can        //guarantee the state of the order stays consistent        DB::transaction(function() {
+            foreach ($this->orderLines as $orderLine) {
+                $this->associate($orderLine);
             }
             $this->save();
         });
@@ -128,10 +151,10 @@ $order->addOrderLine($product3, $qty3);
 
 //user clicks on the "Checkout" button
 if ($order->startCheckout()) {
-  dispatch(new RunCheckout($order));
+    dispatch(new RunCheckout($order));
 } else {
-  //return some response indicating to the frontend the issue
-  //which would presumably display a notification to the user
+    //return some response indicating to the frontend the issue
+    //which would presumably display a notification to the user
 }
 ```
 
@@ -168,36 +191,36 @@ class Order extends Model
 //namespace & use statements
 class Order extends Model
 {
-	//properties and method definitions
-	/**
-	* @param $sequence : The location of the order line in the array
-	*/
-	public function removeOrderline($sequence)
-	{
-		if (isset($this->orderLines[$sequence])) {
-			$orderLine = $this->orderLines[$sequence];
-			$totalAmountDelta = $orderLine->product->price +
+    //properties and method definitions
+    /**
+    * @param $sequence : The location of the order line in the array
+    */
+    public function removeOrderline($sequence)
+    {
+        if (isset($this->orderLines[$sequence])) {
+            $orderLine = $this->orderLines[$sequence];
+            $totalAmountDelta = $orderLine->product->price +
 				($orderLine->product->price * static::TAX_RATE);
-			$this->total -= $totalAmountDelta;
-			unset ($this->orderLines[$sequence]));
-		}
-	}
+            $this->total -= $totalAmountDelta;
+            unset($this->orderLines[$sequence]));
+        }
+    }
 		
-	public function updateOuantity($sequence, $newOuantity)
-	{
-		if (isset($this->orderLines[$sequence])) {
-			//get the product that corresponds to that order line:
-			$orderLine = $this->orderLines[$sequence];
-			$product = $orderLine->product;
-			//remove the orderLine completely from the array:
-			$totalAmountDelta = $product->price + ($product->price
+    public function updateQuantity($sequence, $newOuantity)
+    {
+        if (isset($this->orderLines[$sequence])) {
+            //get the product that corresponds to that order line:
+            $orderLine = $this->orderLines[$sequence];
+            $product = $orderLine->product;
+            //remove the orderLine completely from the array:
+            $totalAmountDelta = $product->price + ($product->price
 				* static::TAX_RATE);
-			$this->amount -= $totalAmountDelta;
-			unset($this->orderLines[$sequence]);
-			//we dont have to worry about adding the product's
-			//tax because that logic is already in addOrderLine():
-			$this->addOrderLine($product, SnewOuantity);
-		}
-	}
+            $this->amount -= $totalAmountDelta;
+            unset($this->orderLines[$sequence]);
+            //we dont have to worry about adding the product's
+            //tax because that logic is already in addOrderLine():
+            $this->addOrderLine($product, SnewOuantity);
+        }
+    }
 }
 ```
