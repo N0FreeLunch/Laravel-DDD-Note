@@ -67,7 +67,7 @@ $order->orderLine->associate($orderLine);
 $order->save();
 ```
 
-```
+```php
 $order = new Order($shopperId, $cartId);
 $order->addOrderLine($product, $qty);
 ```
