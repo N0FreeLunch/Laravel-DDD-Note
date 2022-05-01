@@ -36,7 +36,7 @@ class Order extends Model
 - 상황에 따른 주문 총액 계산이 달라지기 때문에 이를 기록해야 해서 하나의 Order 모델에는 여러 OrderLine을 가져야 하는 것.
 - 클레스의 멤버 변수의 값은 엔티티에 해당한다. 
 - 일반적으로 객체의 멤버 변수를 세팅할 때, 생성자를 통해서 세팅한다는 것은 한 번만 세팅해서 값을 가져다 쓰겠다는 의미이다.
-
+- 함수의 파라메터에서 `$paymentId=null, ShippingId $shippingId=null` 는 빈 값으로 입력 될 수 있다.
 
 ```php
 namespace Ecommerce\Domain\Models\Orders\Order;
@@ -71,6 +71,23 @@ class OrderLine extends Model
 }
 ```
 
+```
+	public function product()
+	{
+		return $this->hasOne(Product::class);
+	}
+```
+- OrderLine 클래스는 내부에는 Product model을 릴레이션으로 정의하고 있다. 
+
+```
+	public function __construct(Product $product, int $quantity, Order $order)	{
+		parent::construct();
+		$this->product = $product;
+		$this->quantity = $quantity;
+	}
+```
+- OrderLine 클래스는 내부에 특정 상품에 대한 금액 합계와 수량에 관한 정보가 들어 있다.
+
 
 ```php
 //create order object
@@ -87,7 +104,7 @@ $order->save();
 $order = new Order($shopperId, $cartId);
 $order->addOrderLine($product, $qty);
 ```
-
+- `$order->orderLine->associate($orderLine);` 애그리게이트 객체를 생성해야 하는데 주문 객체에서 주문라인 객체로 접근하는 방식으로 접근하는 방식이다.
 
 ```php
 //use cases & namespaces
