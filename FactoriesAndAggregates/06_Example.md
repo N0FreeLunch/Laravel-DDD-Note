@@ -104,12 +104,13 @@ $order->save();
 - 위 코드는 애그리게이트 경계를 구성하는 코드로 주문에 관련된 여러 객체를 사용하고 있다. 
 - 하지만 위 코드를 보면 객체를 인스턴스화하는 코드를 직접 사용하고 있지 않다. 왜냐하면 코드가 지저분해지는 효과가 있기 때문이다.
 
-## 애그리게이트 
+## 애그리게이트 루트
 ```php
 //namespace & use cases
 class Order extends Model{
         //methods and property definitions
-        public function addOrderLine(Product $product, int $qty)	{
+        public function addOrderLine(Product $product, int $qty)
+        {
             $orderLine = OrderLine::create($product, $qty);
             $this->orderLines()->associate($orderLine);
             $this->save();
