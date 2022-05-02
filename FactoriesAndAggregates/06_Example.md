@@ -34,10 +34,11 @@ class Order extends Model
 - Order모델과 OrderLine 모델의 관계는 1:n 관계
 - 하나의 주문은 여러 OrderLine을 가져야 한다. 왜냐하면 주문라인은 상황에 따라서 여러 다른 총액 상황을 가지고 있다.
 - 상황에 따른 주문 총액 계산이 달라지기 때문에 이를 기록해야 해서 하나의 Order 모델에는 여러 OrderLine을 가져야 하는 것.
-- 클레스의 멤버 변수의 값은 엔티티에 해당한다. 
+- 클레스의 멤버 변수의 값은 엔티티에 해당한다.
 - 일반적으로 객체의 멤버 변수를 세팅할 때, 생성자를 통해서 세팅한다는 것은 한 번만 세팅해서 값을 가져다 쓰겠다는 의미이다.
-- 함수의 파라메터에서 `$paymentId=null, ShippingId $shippingId=null` 는 빈 값으로 입력 될 수 있다.
+- 함수의 파라메터에서 `$paymentId=null, ShippingId $shippingId=null`는 빈 값으로 입력 될 수 있다.
 
+## OrderLine 
 ```php
 namespace Ecommerce\Domain\Models\Orders\Order;
 
@@ -99,12 +100,24 @@ $orderLine = OrderLine::create($product, $quantity);
 $order->orderLine->associate($orderLine);
 $order->save();
 ```
-
-```php
-$order = new Order($shopperId, $cartId);
-$order->addOrderLine($product, $qty);
-```
 - `$order->orderLine->associate($orderLine);` 애그리게이트 객체를 생성해야 하는데 주문 객체에서 주문라인 객체로 접근하는 방식으로 접근하는 방식이다.
+- 위 코드는 애그리게이트 경계를 구성하는 코드로 주문에 관련된 여러 객체를 사용하고 있다. 
+- 하지만 위 코드를 보면 객체를 인스턴스화하는 코드를 직접 사용하고 있지 않다. 왜냐하면 코드가 지저분해지는 효과가 있기 때문이다.
+
+## 애그리게이트 
+```php
+//namespace & use cases
+class Order extends Model{
+        //methods and property definitions
+        public function addOrderLine(Product $product, int $qty)	{
+            $orderLine = OrderLine::create($product, $qty);
+            $this->orderLines()->associate($orderLine);
+            $this->save();
+        }
+}
+```
+
+
 
 ```php
 //use cases & namespaces
