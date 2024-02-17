@@ -66,8 +66,8 @@ class Custormer extends Model
 <?php
 use App\Models\Customer;
 
-$Customer::first();
-echo $Customer->phone;
+$customer = Customer::first();
+echo $customer->phone;
 echo $customer->phone_type;
 ```
 - 엘로퀀트 모델을 불러다 쓸 때는 정적 메서드 방식으로 사용한다.
