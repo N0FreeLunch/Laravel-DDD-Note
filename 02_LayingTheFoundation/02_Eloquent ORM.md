@@ -42,35 +42,38 @@
 - 하지만 데이터의 변경이 이뤄지는 경우 이를 감지하여 DTO의 데이터를 리프레시 해 줘야 한다. 라라벨의 Eloquent ORM은 모델 옵저버 기능을 활용해 데이터의 변경이 일어났을 경우, ORM의 데이터를 변경해 주는 기능을 가지고 있다. 하지만 DTO의 경우는 기본적으로 수동으로 리프레시를 해야 한다.
 
 #### 라라벨에서의 DTO
-- 라라벨의 Eloquent ORM은 DTO와는 다른 개념이다.디비의 데이터를 가져오기 위한 제약 및 관계를 만들기 위한 기능 등 실용적인 쓰임을 위해서 만든 것으로 엑티브레코드라는 명칭으로 불린다.
+- 라라벨의 Eloquent ORM은 DTO와는 다른 개념이다. 디비의 데이터를 가져오기 위한 제약 및 관계를 만들기 위한 기능 등 실용적인 쓰임을 위해서 만든 것으로 엑티브레코드라는 명칭으로 불린다.
 - ORM에서 사용할 수 없는 쿼리의 세부적인 컨트롤 등을 위해서 ORM과 영속성 계층 사이 DTO를 정의하여 쿼리를 세부적으로 컨트롤 하는 인터페이스를 제공하는 객체를 만들 수 있다. 하지만 대개의 경우, ORM이 제공하는 기능을 활용해서 편리하게 레포지토리 인터페이스를 만들 수 있기 때문에 DTO 계층을 따로 만들 필요는 없다.
 
 
 ### Eloquent 모델의 예
-```
+```php
 <?php
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
+
 class Custormer extends Model
 {
   public $table = 'customers';
   protected $fillable = ['name', 'phone', 'phone_type'];
 }
 ```
-- `public $table = 'customers';` : customers이라는 이름을 가진 테이블을 엘로퀀트에 매핑한다는 의미
-- `protected $fillable = ['name', 'phone', 'phone_type'];` : 엘로퀀트를 통해서 데이터를 가져오는 컬럼은 테이블의 name, phone, phone_type 세 가지 컬럼만 가져오는 것.
+- `public $table = 'customers';` : customers이라는 이름을 가진 테이블을 엘로퀀트에 매핑한다는 의미이다.
+- `protected $fillable = ['name', 'phone', 'phone_type'];` : 엘로퀀트를 통해서 데이터를 가져오는 컬럼은 테이블의 name, phone, phone_type 세 가지 컬럼만 사용하겠다는 의미이다.
 
-```
+```php
 <?php
 use App\Models\Customer;
+
 $Customer::first();
-echo $Customer -> phone;
-echo $customer -> phone_type;
+echo $Customer->phone;
+echo $customer->phone_type;
 ```
 - 엘로퀀트 모델을 불러다 쓸 때는 정적 메서드 방식으로 사용한다.
 - 데이터를 가져올 때는 '엘로퀀트 컬렉션'의 함수를 사용하여 데이터를 불러 온다.
 - 데이터를 불러 왔을 때, 하나의 레코드에 대한 데이터이면 멤버 접근 방식으로 컬럼을 사용할 수 있으며, 배열 형태의 컬렉션이면 배열의 원소 하나에 해당하는 객체에 접근한 후 객체의 멤버로 레코드의 컬럼 값을 접근할 수 있다.
-- 컬럼 값 조회 : `$Customer -> phone`, `$customer -> phone_type`
+- 컬럼 값 조회 : `$Customer->phone`, `$customer->phone_type`
 
 ## 스토어의 원본 데이터를 변환하여 다뤄야 할 때
 - 기본적으로 쿼리를 사용하든 엘로퀀트를 사용하든 데이터베이스 안의 데이터를 그대로 보여준다. 하지만 클라이언트 쪽에 데이터를 보여 줄 때는 디비의 데이터를 그대로 보여주는 것이 아니라 가공을 해서 데이터를 보여 주는 경우가 많다. 이 경우 엘로퀀트를 사용하면 엘로퀀트로 데이터를 받아 오는 즉시 변환한 값을 받을 수 있다.
@@ -83,7 +86,7 @@ echo $customer -> phone_type;
 
 ### 스키마 설계
 - customer_type_name 컬럼의 의 값으로 영희, 철수가 데이터로 들어 있고 각각에 대해 customer_type_id 컬럼의 값으로 1, 2라는 데이터가 들어 있다고 하자.  customer_type_id 1이 영희를 customer_type_id  2가 철수를 지정하는 것이기 때문에 하나의 데이터만 있어도 식별이 되는 대상을 두 데이터를 넣어 만들었다. 보통 이런 경우 테이블을 하나에 두 컬럼을 정의하지 않고 아니라 타입에 관한 테이블을 따로 분리 한다. 그래서 현재 테이블에는 customer_type_id 만 넣고 customer_type이라는 다른 테이블에 id, name을 가진 대상을 넣는다. 따라서 하나의 테이블에 customer_type_name, customer_type_id 두 컬럼을 넣는 것은 동일한 타입을 가진 레코드가 많아지면 많아질수록 customer_type_id와 customer_type_name 그룹을 반복하는 양태를 띤다. 중복 방식으로 데이터를 복제하게 되므로 바람직한 테이블 설계가 아니다.
-- 
+
 ### 엘로퀀트를 사용하는 경우
 - 웹 어플리케이션의 모델이 가지는 역할은 저장소의 데이터를 다루는 방식에 관한 정의를 담고 있다. 영속성 계층의 데이터와 애플리케이션 계층의 데이터를 따로 관리하지 않기 위해서는 영속성 계층의 데이터를 애플리케이션 계층의 데이터로 가져올 때 어떤 엑션을 통해서 변환 해서 가져오는 방식으로 만드는 것이다. DTO의 경우처럼 변환된 데이터를 따로 저장을 하는 방식을 사용하는 것이 아니라, 영속성 계층의 데이터를 애플리케이션 계층으로 저장을 하지 않고 표현의 변환을 하는 방식을 사용한다.
 - 영속성 계층의 데이터를 가져올 때 데이터를 애플리케이션 계층에 맞는 표현으로 변환을 하기 위해서 라라벨의 엘로퀀트 모델은 mutators 및 accessors라는 기능을 제공한다.
@@ -95,10 +98,11 @@ echo $customer -> phone_type;
 
 #### example
 - name의 첫 글자가 대문자로 변환되어 반환 되도록 만든다.
-- 폰 타입에 따라 타입 넘버가 아닌 타입에 해당하는 문자열이 출력되도록 만든다.
-```
+- phone 타입에 따라 타입 넘버가 아닌 타입에 해당하는 문자열이 출력되도록 만든다.
+```php
 <?php
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
@@ -134,6 +138,7 @@ class Customer extends Model
 ```
 <?php
 use App\Models\Customer;
+
 $customer = Customer::find(2);
 echo $customer -> phone_type;
 echo $customer -> getAttribute('phone_type');
