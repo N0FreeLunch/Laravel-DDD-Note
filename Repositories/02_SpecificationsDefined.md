@@ -13,31 +13,40 @@
 
 
 ## 사양 패턴을 구현하는 리포지토리
-```
-<interface>
-ClaimRepositoryInterface
-query(ClaimSpecificationInterface $specification)
-
-<--------
-
-ClaimRepository
-query(ClaimSpecificationInterface $specification)
-
->>>>>>>>>
-
-<interface>
-ClaimSpecificationInterface
-specifies(Claim $claim): bool
-
-<--------
-
-LastestClaimSpecification
-specifies(Claim $claim): bool
+```php
+Interface ClaimRepositoryInterface
+{
+    public function query(ClaimSpecificationInterface $specification);
+}
 ```
 
-`<--------` 위쪽의 구현은 아래쪽 (원래는 실선 화살표)
+```php
+class ClaimRepository implement ClaimRepositoryInterface
+{
+    public function query(ClaimSpecificationInterface $specification)
+    {
+         // ...
+    }
+}
 
-`>>>>>>>>>` 위쪽이 아래쪽을 사용 (원래는 점선 화살표)
+```
+
+```php
+Interface ClaimSpecificationInterface
+{
+    public specifies(Claim $claim): bool;
+}
+```
+
+```php
+class LastestClaimSpecification implement ClaimSpecificationInterface
+{
+    public function specifies(Claim $claim): bool
+    {
+        // ...
+    }
+}
+```
 
 #### 관계 해석
 - 클레임 리포지토리의 query() 메소드는 인자로 클레임사양 인터페이스(ClaimSpecificationInterface)로 구현되는 인스턴스를 받는다.
@@ -49,6 +58,7 @@ specifies(Claim $claim): bool
 
 ```php
 namespace Claim\Submission\Domain\Contracts;
+
 use Claim\Submission\Domain\Models\Claim;
 use ClaimSpecificationlnterface;
 
@@ -59,13 +69,16 @@ interface ClaimRepositorylnterface {
 
 ```php
 namespace Claim\Submission\Infrastructure\Repositories;
+
 use Claim\Submission\Domain\Contracts\ClaimRepositoryInterface;
 use Claim\Submission\Domain\Contracts\ClaimSpecificationlnterface;
 
-class ClaimRepository implements ClaimRepositorylnterface {
-    public function query(ClaimSpecificationInterface $specification){
+class ClaimRepository implements ClaimRepositorylnterface
+{
+    public function query(ClaimSpecificationInterface $specification)
+    {
         return Claim::get()->filter(function (Claim $claim) use ($specification) {
-                return $specification->specifies($claim);
+            return $specification->specifies($claim);
         }
     }
 }
@@ -103,6 +116,7 @@ $claimsSubmittedLastYear = Claim::whereBetween(
 
 ```php
 use Claim\Submission\Infrastructure\Repositories\ClaimRepository;
+
 $claimRepository = new ClaimRepository();
 
 $latestClaims = $claimRepository->query(
@@ -117,7 +131,9 @@ $latestClaims = $claimRepository->query(
 ### 리포지토리에 사양 정의하기
 - 데이터 필터링, 결과의 수 제한 등을 통해 쿼리 실행 시간이나 결과 쿼리의 양을 줄이는 방식이 필요하다. 리포지토리에 메소드를 추가하는 방식으로 `submitWithinRange($startDate, $endDate)` 재사용성을 높일 수 있다.
 ```php
-namespace Claim\Submission\Domain\Contracts;use Claim\Submission\Domain\Models\Claim;
+namespace Claim\Submission\Domain\Contracts;
+
+use Claim\Submission\Domain\Models\Claim;
 
 interface ClaimSpecificationlnterface{
     public function specifies(Claim $claim);
