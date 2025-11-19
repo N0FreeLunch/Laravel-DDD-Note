@@ -46,6 +46,6 @@
 
 라라벨의 엘로퀀트는 사양페턴을 만들기에 아주 좋은 시스템을 가지고 있는데, or 조건에 해당하는 쿼리 조건을 만들지 않아도 `orWhere(function ($q) { $q->isSomeCondition() })`과 같은 방식으로 로직을 만들 수 있는 편의성을 제공하기 때문이다.
 
-not 조건의 경우에는 `$q->isSomeCondition(excluded: true)`와 같이 명명된 인자를 사용하는 방식으로 메소드를 정의해 주면 된다.
+not 조건의 경우에는 `$q->isSomeCondition(excluded: true)`와 같이 명명된 인자를 사용하는 방식으로 메소드를 정의해 주면 된다. `whereNot` 또는 `orWhereNot` 등의 엘로퀀트에서 제공하는 메소드를 사용하는 방법을 쓸 수도 있다. `whereNot(function ($q) { $q->isSomeCondition() })` 이나 `orWhereNot(function ($q) { $q->isSomeCondition() })`을 만들 수 있는 것이다.
 
 NAND, NOR, XOR, XNOR 등의 연산자는 and, or, not 연산자의 조합으로 구현할 수 있기 때문에 없어도 되지만, 필요하다면 커스터마이즈 메소드로 추가하는 것을 고려할 수 있다.
